@@ -3,6 +3,7 @@ import { Recursive } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/sonner";
 
 const recursive = Recursive({ subsets: ["latin"] });
 
@@ -29,7 +30,7 @@ export default function RootLayout({
           <Footer />
         </main>
 
-        {/* <Toaster /> */}
+        <Toaster position="top-center" />
       </body>
     </html>
   );
