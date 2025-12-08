@@ -9,34 +9,23 @@ import { useState, useTransition } from "react";
 import Dropzone, { FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 
-export default function Page() {
+const Page = () => {
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-
   const router = useRouter();
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
     onClientUploadComplete: ([data]) => {
-      // image uploaded successfully
       const configId = data.serverData.configId;
-
-      // push to next step with configId
+      console.log("Finish upload: ", configId);
       startTransition(() => {
         router.push(`/configure/design?id=${configId}`);
       });
     },
-    onUploadProgress: (p) => {
+    onUploadProgress(p) {
       setUploadProgress(p);
     },
   });
-
-  const [isPending, startTransition] = useTransition();
-
-  const onDropAccepted = (acceptedFiles: File[]) => {
-    startUpload(acceptedFiles, { configId: undefined });
-
-    setIsDragOver(false);
-  };
 
   const onDropRejected = (rejectedFiles: FileRejection[]) => {
     const [file] = rejectedFiles;
@@ -47,6 +36,14 @@ export default function Page() {
       `${file.file.type} type is not supported.\nPlease upload a valid image file.`
     );
   };
+
+  const onDropAccepted = (acceptedFiles: File[]) => {
+    startUpload(acceptedFiles, { configId: undefined });
+
+    setIsDragOver(false);
+  };
+
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div
@@ -76,39 +73,37 @@ export default function Page() {
             >
               <input {...getInputProps()} />
               {isDragOver ? (
-                <MousePointerSquareDashed className="size-6 text-zinc-500 mb-2" />
+                <MousePointerSquareDashed className="h-6 w-6 text-zinc-500 mb-2" />
               ) : isUploading || isPending ? (
-                <Loader2 className="animate-spin size-6 text-zinc-500 mb-2" />
+                <Loader2 className="animate-spin h-6 w-6 text-zinc-500 mb-2" />
               ) : (
-                <Image className="size-6 text-zinc-500 mb-2" />
+                <Image className="h-6 w-6 text-zinc-500 mb-2" />
               )}
-              <div
-                className="flex flex-col justify-center mb-2 text-sm text-shadow-zinc-700
-              "
-              >
+              <div className="flex flex-col justify-center mb-2 text-sm text-zinc-700">
                 {isUploading ? (
                   <div className="flex flex-col items-center">
                     <p>Uploading...</p>
                     <Progress
-                      className="mt-2 w-40 h-2 bg-gray-300"
                       value={uploadProgress}
+                      className="mt-2 w-40 h-2 bg-gray-300"
                     />
                   </div>
                 ) : isPending ? (
-                  <div className="flex flex-col items-center ">
+                  <div className="flex flex-col items-center">
                     <p>Redirecting, please wait...</p>
                   </div>
                 ) : isDragOver ? (
                   <p>
-                    <span className="font-semibold ">Drop File</span>
+                    <span className="font-semibold">Drop file</span> to upload
                   </p>
                 ) : (
                   <p>
-                    <span className="font-semibold ">Click to upload</span> or
+                    <span className="font-semibold">Click to upload</span> or
                     drag and drop
                   </p>
                 )}
               </div>
+
               {isPending ? null : (
                 <p className="text-xs text-zinc-500">PNG, JPG, JPEG</p>
               )}
@@ -118,4 +113,6 @@ export default function Page() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;
