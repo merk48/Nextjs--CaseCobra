@@ -26,6 +26,9 @@ import { ArrowRight, Check, ChevronsUpDown } from "lucide-react";
 import { BASE_PRICE } from "@/config/products";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { saveConfig as _saveConfig, SaveConfigArgs } from "./actions";
 
 interface DesignConfiguratorProps {
   configId: string;
@@ -33,12 +36,31 @@ interface DesignConfiguratorProps {
   imageDimensions: { width: number; height: number };
 }
 
-export function DesignConfigurator({
+const DesignConfigurator = ({
   configId,
   imageUrl,
   imageDimensions,
-}: DesignConfiguratorProps) {
+}: DesignConfiguratorProps) => {
   const { toast } = useToast();
+  const router = useRouter();
+
+  const { mutate: saveConfig, isPending } = useMutation({
+    mutationKey: ["save-config"],
+    mutationFn: async (args: SaveConfigArgs) => {
+      await Promise.all([saveConfiguration(), _saveConfig(args)]);
+    },
+    onError: () => {
+      toast({
+        title: "Something went wrong",
+        description: "There was an error on our end. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      router.push(`/configure/preview?id=${configId}`);
+    },
+  });
+
   const [options, setOptions] = useState<{
     color: (typeof COLORS)[number];
     model: (typeof MODELS.options)[number];
@@ -50,40 +72,34 @@ export function DesignConfigurator({
     material: MATERIALS.options[0],
     finish: FINISHES.options[0],
   });
-  const isPending = false;
 
-  const [renderedDimension, setRenderedDimension] = useState<{
-    width: number;
-    height: number;
-  }>({
+  const [renderedDimension, setRenderedDimension] = useState({
     width: imageDimensions.width / 4,
     height: imageDimensions.height / 4,
   });
 
-  const [renderedPosition, setRenderedPosition] = useState<{
-    x: number;
-    y: number;
-  }>({
+  const [renderedPosition, setRenderedPosition] = useState({
     x: 150,
     y: 205,
   });
 
+  const phoneCaseRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const phoneCasRef = useRef<HTMLDivElement>(null);
 
   const { startUpload } = useUploadThing("imageUploader");
 
-  const saveConfigiguration = async () => {
+  async function saveConfiguration() {
     try {
       const {
         left: caseLeft,
         top: caseTop,
         width,
         height,
-      } = phoneCasRef.current!.getBoundingClientRect();
+      } = phoneCaseRef.current!.getBoundingClientRect();
 
       const { left: containerLeft, top: containerTop } =
         containerRef.current!.getBoundingClientRect();
+
       const leftOffset = caseLeft - containerLeft;
       const topOffset = caseTop - containerTop;
 
@@ -112,18 +128,18 @@ export function DesignConfigurator({
       const base64Data = base64.split(",")[1];
 
       const blob = base64ToBlob(base64Data, "image/png");
-
       const file = new File([blob], "filename.png", { type: "image/png" });
 
       await startUpload([file], { configId });
     } catch (err) {
       toast({
         title: "Something went wrong",
-        description: "try again",
+        description:
+          "There was a problem saving your config, please try again.",
         variant: "destructive",
       });
     }
-  };
+  }
 
   function base64ToBlob(base64: string, mimeType: string) {
     const byteCharacters = atob(base64);
@@ -131,13 +147,9 @@ export function DesignConfigurator({
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-
     const byteArray = new Uint8Array(byteNumbers);
-
     return new Blob([byteArray], { type: mimeType });
   }
-
-  // const saveConfig = async ({ configId, color, model, material, finish }) => {};
 
   return (
     <div className="relative mt-20 grid grid-cols-1 lg:grid-cols-3 mb-20 pb-20">
@@ -147,7 +159,7 @@ export function DesignConfigurator({
       >
         <div className="relative w-60 bg-opacity-50 pointer-events-none aspect-[896/1831]">
           <AspectRatio
-            ref={phoneCasRef}
+            ref={phoneCaseRef}
             ratio={896 / 1831}
             className="pointer-events-none relative z-50 aspect-[896/1831] w-full"
           >
@@ -166,18 +178,20 @@ export function DesignConfigurator({
             )}
           />
         </div>
+
         <Rnd
           default={{
             x: 150,
             y: 205,
-            width: imageDimensions.width / 4,
             height: imageDimensions.height / 4,
+            width: imageDimensions.width / 4,
           }}
           onResizeStop={(_, __, ref, ___, { x, y }) => {
             setRenderedDimension({
-              width: parseInt(ref.style.width.slice(0, -2)),
               height: parseInt(ref.style.height.slice(0, -2)),
+              width: parseInt(ref.style.width.slice(0, -2)),
             });
+
             setRenderedPosition({ x, y });
           }}
           onDragStop={(_, data) => {
@@ -189,11 +203,11 @@ export function DesignConfigurator({
           resizeHandleComponent={{
             bottomRight: <HandleComponent />,
             bottomLeft: <HandleComponent />,
-            topLeft: <HandleComponent />,
             topRight: <HandleComponent />,
+            topLeft: <HandleComponent />,
           }}
         >
-          <div className="relative w-full h-full ">
+          <div className="relative w-full h-full">
             <NextImage
               src={imageUrl}
               fill
@@ -203,11 +217,12 @@ export function DesignConfigurator({
           </div>
         </Rnd>
       </div>
+
       <div className="h-[37.5rem] w-full col-span-full lg:col-span-1 flex flex-col bg-white">
         <ScrollArea className="relative flex-1 overflow-auto">
           <div
             aria-hidden="true"
-            className="absolute z-10 inset-x-0 bottom-0 h-12 bg-linear-to-t from-white pointer-events-none"
+            className="absolute z-10 inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white pointer-events-none"
           />
 
           <div className="px-8 pb-12 pt-8">
@@ -217,20 +232,20 @@ export function DesignConfigurator({
 
             <div className="w-full h-px bg-zinc-200 my-6" />
 
-            <div className="relative mt-4 h-full flex flex-col">
+            <div className="relative mt-4 h-full flex flex-col justify-between">
               <div className="flex flex-col gap-6">
                 <RadioGroup
                   value={options.color}
-                  onChange={(val) =>
+                  onChange={(val) => {
                     setOptions((prev) => ({
                       ...prev,
                       color: val,
-                    }))
-                  }
+                    }));
+                  }}
                 >
                   <Label>Color: {options.color.label}</Label>
                   <div className="mt-3 flex items-center space-x-3">
-                    {COLORS.map((color, i) => (
+                    {COLORS.map((color) => (
                       <RadioGroup.Option
                         key={color.label}
                         value={color}
@@ -253,6 +268,7 @@ export function DesignConfigurator({
                     ))}
                   </div>
                 </RadioGroup>
+
                 <div className="relative flex flex-col gap-3 w-full">
                   <Label>Model</Label>
                   <DropdownMenu>
@@ -295,14 +311,18 @@ export function DesignConfigurator({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+
                 {[MATERIALS, FINISHES].map(
                   ({ name, options: selectableOptions }) => (
                     <RadioGroup
                       key={name}
                       value={options[name]}
-                      onChange={(val) =>
-                        setOptions((prev) => ({ ...prev, [name]: val }))
-                      }
+                      onChange={(val) => {
+                        setOptions((prev) => ({
+                          ...prev,
+                          [name]: val,
+                        }));
+                      }}
                     >
                       <Label>
                         {name.slice(0, 1).toUpperCase() + name.slice(1)}
@@ -324,11 +344,12 @@ export function DesignConfigurator({
                             <span className="flex items-center">
                               <span className="flex flex-col text-sm">
                                 <RadioGroup.Label
+                                  className="font-medium text-gray-900"
                                   as="span"
-                                  className="font-medium text-gray-900 "
                                 >
                                   {option.label}
                                 </RadioGroup.Label>
+
                                 {option.description ? (
                                   <RadioGroup.Description
                                     as="span"
@@ -341,6 +362,7 @@ export function DesignConfigurator({
                                 ) : null}
                               </span>
                             </span>
+
                             <RadioGroup.Description
                               as="span"
                               className="mt-2 flex text-sm sm:ml-4 sm:mt-0 sm:flex-col sm:text-right"
@@ -371,12 +393,20 @@ export function DesignConfigurator({
                 )}
               </p>
               <Button
-                // isLoading={isPending}
+                isLoading={isPending}
                 disabled={isPending}
-                // loadingText="Saving"
-                onClick={() => saveConfigiguration()}
+                loadingText="Saving"
+                onClick={() =>
+                  saveConfig({
+                    configId,
+                    color: options.color.value,
+                    finish: options.finish.value,
+                    material: options.material.value,
+                    model: options.model.value,
+                  })
+                }
                 size="sm"
-                className="w-full"
+                className="flex-1"
               >
                 Continue
                 <ArrowRight className="h-4 w-4 ml-1.5 inline" />
@@ -387,4 +417,6 @@ export function DesignConfigurator({
       </div>
     </div>
   );
-}
+};
+
+export default DesignConfigurator;

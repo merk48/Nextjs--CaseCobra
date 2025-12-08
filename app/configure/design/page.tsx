@@ -1,6 +1,6 @@
 import db from "@/db";
 import { notFound } from "next/navigation";
-import { DesignConfigurator } from "./DesignConfigurator";
+import DesignConfigurator from "./DesignConfigurator";
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

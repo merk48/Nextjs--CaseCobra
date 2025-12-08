@@ -45,6 +45,7 @@ enum CaseColor {
   black
   blue
   rose
+  gold
 }
 
 model Configuration {
