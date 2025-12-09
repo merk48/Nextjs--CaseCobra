@@ -22,7 +22,7 @@ export function Phone({
       {...props}
     >
       <img
-        className="pointer-events-none z-50 select-none"
+        className="pointer-events-none z-50 select-none min-w-full min-h-full"
         src={
           dark
             ? "/phone-template-dark-edges.png"

@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: "fy9snrvagt.ufs.sh",
         pathname: "/f/**",
       },
+      {
+        protocol: "https",
+        hostname: "%3A%2F%2Ffy9snrvagt.ufs.sh",
+        pathname: "/f/**",
+      },
     ],
   },
 };
