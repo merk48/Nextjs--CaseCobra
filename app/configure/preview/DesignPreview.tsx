@@ -11,6 +11,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
+import { createCheckoutSession } from "./action";
 
 const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   const router = useRouter();
@@ -37,7 +38,7 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
     totalPrice += PRODUCT_PRICES.material.polycarbonate;
   if (finish === "textured") totalPrice += PRODUCT_PRICES.finish.textured;
 
-  const { mutate: createPaymentSession } = useMutation({
+  const { isPending, mutate: createPaymentSession } = useMutation({
     mutationKey: ["get-checkout-session"],
     mutationFn: createCheckoutSession,
     onSuccess: ({ url }) => {
@@ -79,9 +80,9 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
       {/* <LoginModal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} /> */}
 
       <div className="mt-20 flex flex-col items-center md:items-start md:grid text-sm sm:grid-cols-12 sm:grid-rows-1 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
-        <div className="md:col-span-4 lg:col-span-3 md:row-span-2 md:row-end-2">
+        <div className="md:col-span-4 lg:col-span-3 md:row-span-2 md:row-end-2 ">
           <Phone
-            className={cn(`bg-${tw}`, "max-w-[200px] md:max-w-full")}
+            className={cn(`bg-${tw}`, "max-w-[150px] md:max-w-full")}
             imgSrc={configuration.croppedImageUrl!}
           />
         </div>
@@ -157,9 +158,9 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
 
             <div className="mt-8 flex justify-center md:justify-end pb-12">
               <Button
-                isLoading={true}
-                disabled={true}
-                loadingText="loading"
+                isLoading={isPending}
+                disabled={isPending}
+                loadingText="checking out"
                 onClick={() => handleCheckout()}
                 className="px-4 sm:px-6 lg:px-8"
               >
