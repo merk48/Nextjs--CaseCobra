@@ -20,6 +20,8 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   const { toast } = useToast();
   const { id } = configuration;
   const { user } = useKindeBrowserClient();
+  console.log("preview user: ", user);
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
