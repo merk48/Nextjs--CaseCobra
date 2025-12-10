@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
 import { createCheckoutSession } from "./action";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import LoginModal from "@/components/LoginModal";
 
 const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   const router = useRouter();
@@ -56,14 +57,14 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   });
 
   const handleCheckout = () => {
-    // if (user) {
-    // create payment session
-    createPaymentSession({ configId: id });
-    // } else {
-    //   // need to log in
-    //   localStorage.setItem("configurationId", id);
-    //   setIsLoginModalOpen(true);
-    // }
+    if (user) {
+      // create payment session
+      createPaymentSession({ configId: id });
+    } else {
+      // need to log in
+      localStorage.setItem("configurationId", id);
+      setIsLoginModalOpen(true);
+    }
   };
 
   return (
@@ -78,7 +79,7 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
         />
       </div>
 
-      {/* <LoginModal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} /> */}
+      <LoginModal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} />
 
       <div className="mt-20 flex flex-col items-center md:items-start md:grid text-sm sm:grid-cols-12 sm:grid-rows-1 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
         <div className="md:col-span-4 lg:col-span-3 md:row-span-2 md:row-end-2 ">
@@ -162,9 +163,7 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
                 isLoading={isPending}
                 disabled={isPending}
                 loadingText="checking out"
-                onClick={() =>
-                  createPaymentSession({ configId: configuration.id })
-                }
+                onClick={() => handleCheckout()}
                 className="px-4 sm:px-6 lg:px-8"
               >
                 Check out <ArrowRight className="h-4 w-4 ml-1.5 inline" />
