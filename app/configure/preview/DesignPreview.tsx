@@ -12,12 +12,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
 import { createCheckoutSession } from "./action";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   const router = useRouter();
   const { toast } = useToast();
   const { id } = configuration;
-  // const { user } = useKindeBrowserClient();
+  const { user } = useKindeBrowserClient();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
@@ -56,8 +57,8 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
 
   const handleCheckout = () => {
     // if (user) {
-    //   // create payment session
-    //   createPaymentSession({ configId: id });
+    // create payment session
+    createPaymentSession({ configId: id });
     // } else {
     //   // need to log in
     //   localStorage.setItem("configurationId", id);
@@ -161,7 +162,9 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
                 isLoading={isPending}
                 disabled={isPending}
                 loadingText="checking out"
-                onClick={() => handleCheckout()}
+                onClick={() =>
+                  createPaymentSession({ configId: configuration.id })
+                }
                 className="px-4 sm:px-6 lg:px-8"
               >
                 Check out <ArrowRight className="h-4 w-4 ml-1.5 inline" />
