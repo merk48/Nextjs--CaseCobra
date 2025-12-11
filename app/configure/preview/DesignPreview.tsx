@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
 import { createCheckoutSession } from "./action";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+
 import LoginModal from "@/components/LoginModal";
 
 const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
@@ -20,7 +21,6 @@ const DesignPreview = ({ configuration }: { configuration: Configuration }) => {
   const { toast } = useToast();
   const { id } = configuration;
   const { user } = useKindeBrowserClient();
-  console.log("preview user: ", user);
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
