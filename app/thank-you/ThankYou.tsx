@@ -28,7 +28,6 @@ export default function ThankYou() {
       </div>
     );
   }
-
   if (data === false) {
     return (
       <div className="w-full mt-24 flex justify-center">
@@ -41,7 +40,7 @@ export default function ThankYou() {
     );
   }
 
-  const { configuration, billingAddress, shippingAddress, amount } = data;
+  const { configuration, billingAddress, shippingAddress, amount } = data!;
   const { color } = configuration;
 
   return (
